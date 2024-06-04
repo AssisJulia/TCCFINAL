@@ -6,13 +6,13 @@
 <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
 
     <div class="rz-p-12 rz-text-align-center" style="font-size: 20px;padding: 1rem!important;">
-        <RadzenLabel Text="@(questao)" Style="margin-left: 8px; vertical-align: middle;" />
+        <RadzenLabel Text="@(questao.ToLower())" Style="margin-left: 8px; vertical-align: middle;" />
     </div>
 
     @if (!string.IsNullOrEmpty(msg))
     {
         <div class="rz-p-12 rz-text-align-center" style="font-size: 16px;padding: 1rem!important;">
-            <RadzenLabel Text="@(msg)" Style="margin-left: 8px; vertical-align: middle;" />
+            <RadzenLabel Text="@(msg.ToLower())" Style="margin-left: 8px; vertical-align: middle;" />
         </div>
     }
 
@@ -24,7 +24,7 @@
     </div>
 
     <div class="rz-p-12 rz-text-align-center" style="margin: 2rem -2rem -2rem -2rem;">
-        <RadzenButton Variant="Variant.Flat" Click=@(() => voltar()) Style="margin-right: 240px; background-color: #217011" Text="Voltar" />
+        <RadzenButton Variant="Variant.Flat" Click=@(() => voltar()) Style="margin-right: 50px; background-color: #217011" Text="Voltar" />
         <RadzenButton Variant="Variant.Flat" Click=@(() => setquestion()) Text="Proxima" Style="background-color: #217011" />
     </div>
 
