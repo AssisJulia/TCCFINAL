@@ -7,7 +7,7 @@ namespace SAMMI.Data.Context
     public class SAMMIContext : DbContext
     {
         public DbSet<Usuario> UsuariosSet { get; set; }
-        public DbSet<Jogo> JogoSet {  get; set; }
+        public DbSet<Pontuacao> PontuacaoSet {  get; set; }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
@@ -22,7 +22,6 @@ namespace SAMMI.Data.Context
 
             base.OnModelCreating(modelBuilder);
         }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             const string conexao = "Server=mysql.tccnapratica.com.br;Database=tccnapratica03;Uid=tccnapratica03;Pwd=Ms478t;";

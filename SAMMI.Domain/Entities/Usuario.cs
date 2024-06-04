@@ -15,6 +15,7 @@ public class Usuario : EntityBase
         string emailLogin, 
         string senha)
     {
+        Id = Guid.NewGuid();
         Nome = nome;
         EmailLogin = emailLogin;
         Senha = senha;

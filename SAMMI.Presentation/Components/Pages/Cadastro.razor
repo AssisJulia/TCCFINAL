@@ -4,6 +4,7 @@
 @using SAMMI.Domain.DTOs.Usuario.Request;
 @using System.Text.RegularExpressions
 @using Newtonsoft.Json
+@using System.Net
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,13 +14,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
 
-@if (cadastroRequest == null)
-{
-    <p><em>Carregando...</em></p>
-}
-else
-{
-    <RadzenTemplateForm Data="@cadastroRequest" Submit="@((UsuarioAdicionarRequest request) => { Submit(request); })">
+
+    <RadzenTemplateForm Data="@usuarioAdicionarRequest" Submit="@((UsuarioAdicionarRequest request) => { Submit(); })">
         <RadzenRow Gap="2rem" Class="rz-p-0 rz-p-lg-4">
             <RadzenColumn Size="12" SizeMD="6">
                 <RadzenStack>
@@ -27,7 +23,7 @@ else
                         <RadzenColumn Size="12">
                             <RadzenFormField Text="Usuário" Variant="@variant" Style="width: 100%; font-family: 'Ubuntu', sans-serif;">
                                 <ChildContent>
-                                    <RadzenTextBox bind-value="@cadastroRequest.Nome" />
+                                    <RadzenTextBox @bind-value="@usuarioAdicionarRequest.Nome" />
                                 </ChildContent>
                                 <End>
                                     <RadzenIcon Icon="account_circle" />
@@ -39,7 +35,7 @@ else
                         <RadzenColumn Size="12">
                             <RadzenFormField Text="E-mail" Variant="@variant" Style="width: 100%; font-family: 'Ubuntu', sans-serif;">
                                 <ChildContent>
-                                    <RadzenTextBox @bind-Value="@cadastroRequest.EmailLogin" />
+                                    <RadzenTextBox @bind-Value="@usuarioAdicionarRequest.EmailLogin" />
                                 </ChildContent>
                                 <End>
                                     <RadzenIcon Icon="mail" />
@@ -51,7 +47,7 @@ else
                         <RadzenColumn Size="12">
                             <RadzenFormField Text="Confirmar e-mail" Variant="@variant" Style="width: 100%; font-family: 'Ubuntu', sans-serif;">
                                 <ChildContent>
-                                    <RadzenTextBox @bind-Value="@cadastroRequest.EmailLoginConfirmacao" />
+                                    <RadzenTextBox @bind-Value="@usuarioAdicionarRequest.EmailLoginConfirmacao" />
                                 </ChildContent>
                                 <End>
                                     <RadzenIcon Icon="mail" />
@@ -63,7 +59,7 @@ else
                         <RadzenColumn Size="12">
                             <RadzenFormField Text="Senha" Variant="@variant" Style="width: 100%; font-family: 'Ubuntu', sans-serif;">
                                 <ChildContent>
-                                    <RadzenPassword @bind-Value="@cadastroRequest.Senha" />
+                                    <RadzenPassword @bind-Value="@usuarioAdicionarRequest.Senha" />
                                 </ChildContent>
                             </RadzenFormField>
                         </RadzenColumn>
@@ -72,7 +68,7 @@ else
                         <RadzenColumn Size="12">
                             <RadzenFormField Text="Confirmar Senha" Variant="@variant" Style="width: 100%; font-family: 'Ubuntu', sans-serif;">
                                 <ChildContent>
-                                    <RadzenPassword @bind-Value="@cadastroRequest.SenhaConfirmacao" />
+                                    <RadzenPassword @bind-Value="@usuarioAdicionarRequest.SenhaConfirmacao" />
                                 </ChildContent>
                             </RadzenFormField>
                         </RadzenColumn>
@@ -85,7 +81,7 @@ else
             <RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Large" Text="Cancelar" Style="background-color: red; color: white" Click="@Cancel" />
         </RadzenStack>
     </RadzenTemplateForm>
-}
+
 
 @code {
     bool mostraSenha = false;
@@ -94,11 +90,52 @@ else
     AlertStyle alerttype; //Warning, Success, Info, Danger
     Variant variant = Variant.Outlined;
 
-    UsuarioAdicionarRequest cadastroRequest = new UsuarioAdicionarRequest();
+    UsuarioAdicionarRequest usuarioAdicionarRequest = new UsuarioAdicionarRequest();
 
-    void Submit(UsuarioAdicionarRequest request)
+    async void Submit()
     {
-        //
+        if (string.IsNullOrEmpty(usuarioAdicionarRequest.Nome) || string.IsNullOrEmpty(usuarioAdicionarRequest.EmailLogin) || string.IsNullOrEmpty(usuarioAdicionarRequest.EmailLoginConfirmacao) || string.IsNullOrEmpty(usuarioAdicionarRequest.Senha) || string.IsNullOrEmpty(usuarioAdicionarRequest.SenhaConfirmacao))
+        {
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Erro",
+                    Detail = "Por favor, preencha todos os campos.",
+                    Duration = 4000
+                });
+            return;
+        }
+
+        //StateHasChanged();
+
+        var response = await HttpClient.PostAsJsonAsync("usuario", usuarioAdicionarRequest);
+        if (response.StatusCode == HttpStatusCode.Created)
+        {
+            //var content = await response.Content.ReadAsStringAsync();
+
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Sucesso",
+                    Detail = "Usuário Registrado com Sucesso!!!",
+                    Duration = 4000
+                });
+
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Usuário existente",
+                    Detail = errorContent,
+                    Duration = 4000
+                });
+        }
+
+        //StateHasChanged();
     }
 
     void Cancel()

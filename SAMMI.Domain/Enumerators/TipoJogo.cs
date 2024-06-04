@@ -6,6 +6,6 @@
         Subtracao,
         Multiplicacao,
         Divisao,
-        Generico,
+        Silaba
     }
 }

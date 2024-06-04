@@ -1,11 +1,12 @@
 using Microsoft.IdentityModel.Tokens;
 using SAMMI.CrossCutting;
 using SAMMI.Data.Context;
-using SAMMI.Domain.DTOs.Jogo.Request;
-using SAMMI.Domain.DTOs.Jogo.Response;
+using SAMMI.Domain.DTOs.Pontuacao.Request;
+using SAMMI.Domain.DTOs.Pontuacao.Response;
 using SAMMI.Domain.DTOs.Usuario.Request;
 using SAMMI.Domain.DTOs.Usuario.Response;
 using SAMMI.Domain.Entities;
+using SAMMI.Domain.Enumerators;
 using SAMMI.Domain.Extensions;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -13,15 +14,21 @@ using System.Text;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+Guid usuarioLogadoId;
 
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.EnableAnnotations();
 });
+
 builder.Services.AddDbContext<SAMMIContext>();
 
-builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});    
 
 builder.Services.ConfigureAuthentication();
 builder.Services.ConfigureAuthenticateSwagger();
@@ -32,7 +39,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseAuthentication();
-//app.UseAuthorization();
+app.UseAuthorization();
 app.UseHttpsRedirection();
 
 #region Endpoints de Usuários
@@ -153,18 +160,20 @@ app.MapPut("/usuario/alterar-senha", (SAMMIContext context, UsuarioAtualizarRequ
 
 #endregion
 
-#region Endpoints de Jogo
-app.MapPost("/jogo", (SAMMIContext context, CriarJogoRequest request) =>
+#region Endpoints de Pontuacao
+app.MapPost("/pontuacao", (SAMMIContext context, ClaimsPrincipal user, CriarPontuacaoRequest request) =>
 {
     try
     {
-        //TODO: pegar o id do usuario do token e remover do request
-        var jogo = new Jogo(request.Disciplina, request.TipoJogo, request.UsuarioId);
+        SetarDadosToken(user);
 
-        context.JogoSet.Add(jogo);
+        //TODO: pegar o id do usuario do token e remover do request
+        var pontuacao = new Pontuacao(usuarioLogadoId, request.Nivel, request.TipoJogo, request.QuantidadePontuacao);
+
+        context.PontuacaoSet.Add(pontuacao);
         context.SaveChanges();
 
-        return Results.Created("Created", $"Jogo Registrado com Sucesso. {jogo.Id}");
+        return Results.Created("Created", $"Jogo Registrado com Sucesso. {pontuacao.Id}");
     }
     catch (Exception ex)
     {
@@ -177,59 +186,36 @@ app.MapPost("/jogo", (SAMMIContext context, CriarJogoRequest request) =>
     operation.Summary = "Novo Jogo";
     return operation;
 }
-).WithTags("Jogos")
+).WithTags("Pontuação")
 .RequireAuthorization();
 
-app.MapGet("/jogo", (SAMMIContext context) =>
+app.MapGet("/Pontuacao", (SAMMIContext context, ClaimsPrincipal user) =>
 {
-    //TODO: obter token do usuario e filtrar pelos jogos relacionados a ele
-    var jogos = context.JogoSet.Select(jogo => new JogoResponse
-    {
-        Data = jogo.Data,
-        TipoJogo = jogo.TipoJogo,
-        Disciplina = jogo.Disciplina,
-        JogoId = jogo.Id,
-        Pontuacao = jogo.Pontuacao
-    });
+    SetarDadosToken(user);
 
-    return Results.Ok(jogos);
+    var pontuacoes = context.PontuacaoSet.Where(p => p.UsuarioId == usuarioLogadoId).Select(p => new ListarPontuacaoResponse
+    {
+        UsuarioId = p.UsuarioId,
+        UsuarioNome = p.Usuario.Nome,
+        Data = p.Data,
+        Nivel = p.Nivel == SAMMI.Domain.Enumerators.Nivel.SeisAnos ? "Seis Anos" : "Sete Anos",
+        TipoJogo = p.TipoJogo == TipoJogo.Adicao ? "Matemática Adição" :
+                   p.TipoJogo == TipoJogo.Subtracao ? "Matemática Subtração" :
+                   p.TipoJogo == TipoJogo.Multiplicacao ? "Matemática Multiplicação" :
+                   p.TipoJogo == TipoJogo.Divisao ? "Matemática Divisão" : "Portugues Sílabas",
+        QuantidadePontuacao = p.QuantidadePontos
+    }).OrderBy(p => p.Data).ThenBy(p => p.QuantidadePontuacao);
+
+    return Results.Ok(pontuacoes);
 })
     .WithOpenApi(operation =>
     {
-        operation.Description = "Endpoint todas as partidas jogada pelo usuário";
-        operation.Summary = "Listar jogos do usuário";
+        operation.Description = "Endpoint para listar a pontuação do usuário logado";
+        operation.Summary = "Listar Pontuações do Usuário";
         return operation;
     })
-    .WithTags("Jogos")
+    .WithTags("Pontuação")
     .RequireAuthorization();
-
-app.MapGet("/jogo/{jogoId}", (SAMMIContext context, Guid jogoId) =>
-{
-    var jogo = context.JogoSet.Find(jogoId);
-    if (jogo is null)
-        return Results.BadRequest("Jogo não Localizado.");
-
-    var response = new JogoResponse
-    {
-        Data = jogo.Data,
-        TipoJogo = jogo.TipoJogo,
-        Disciplina = jogo.Disciplina,
-        JogoId = jogo.Id,
-        Pontuacao = jogo.Pontuacao
-    };
-
-    return Results.Ok(response);
-})
-    .WithOpenApi(operation =>
-    {
-        operation.Description = "Endpoint para obter um jogo do usuário com base no ID informado";
-        operation.Summary = "Obter o jogo de um usuário";
-        operation.Parameters[0].Description = "Id do Jogo";
-        return operation;
-    })
-    .WithTags("Jogos")
-    .RequireAuthorization();
-
 
 #endregion
 
@@ -281,5 +267,13 @@ app.MapPost("/autenticar", (SAMMIContext context, UsuarioAutenticarRequest usuar
 
 #endregion
 
-
 app.Run();
+
+#region Métodos de Apoio
+
+void SetarDadosToken(ClaimsPrincipal user)
+{
+    usuarioLogadoId = Guid.Parse(user.Identities.First().Claims.ToList()[0].Value);
+}
+
+#endregion
