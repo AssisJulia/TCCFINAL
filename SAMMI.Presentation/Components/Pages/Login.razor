@@ -1,0 +1,85 @@
+@page "/"
+
+@using SAMMI.Domain.DTOs.Usuario.Response
+@using SAMMI.Domain.DTOs.Usuario.Request;
+@using System.Net
+@using System.Text.Json
+@using System.IdentityModel.Tokens.Jwt
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+
+<RadzenRow Gap="0" Class="rz-m-2 rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 800px;">
+    <RadzenColumn Size="12" SizeMD="6">
+        <RadzenCard Style="height: 100%; background-color: #28E1F6; align-content: center; text-align: center">
+            <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H2" Style="color: white; font-family: 'Ubuntu', sans-serif;">Bem Vindo ao</RadzenText>
+            <RadzenText TextStyle="TextStyle.DisplayH3" Style="color: white; font-family: 'Lilita One', sans-serif;">Sammi Games!</RadzenText>
+            <RadzenImage Path="logoSammi.png" Style="width: 40%;" AlternateText="O Melhor Site de Jogos Educativos Infantis."/>
+        </RadzenCard>
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeMD="6">
+        <RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-p-12">
+            <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H2" Style="color: black; font-family: 'Ubuntu', sans-serif; text-align: center">Login</RadzenText>
+            <RadzenTemplateForm TItem="UsuarioAutenticarRequest" Data="@usuarioAutenticarRequest">
+                <RadzenLogin Username=@usuarioAutenticarRequest.EmailLogin
+                             Password=@usuarioAutenticarRequest.Senha
+                             AllowRegister="true" 
+                             RegisterMessageText="Ainda não possui uma conta?" 
+                             RegisterText="Cadastre-se" 
+                             AllowResetPassword="false" 
+                             UserText="Email" 
+                             LoginText="Login"
+                             PasswordText="Senha"
+                             UserRequired="Campo Obrigatório"
+                             PasswordRequired="Campo Obrigatório"
+                             Login="Autenticar"
+                             Register="RegistrarUsuario"/>
+            </RadzenTemplateForm>
+        </RadzenCard>
+    </RadzenColumn>
+</RadzenRow>
+
+@code {
+    UsuarioAutenticarRequest usuarioAutenticarRequest = new UsuarioAutenticarRequest();
+
+    private async void Autenticar()
+    {
+        //Provisório
+        usuarioAutenticarRequest.EmailLogin = "miguel@gmail.com";
+        usuarioAutenticarRequest.Senha = "123456";
+
+        var response = await HttpClient.PostAsJsonAsync("autenticar", usuarioAutenticarRequest);
+
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var usuarioAutenticarResponse = JsonSerializer.Deserialize<UsuarioAutenticarResponse>(content, options);
+
+            HttpClient.DefaultRequestHeaders.Clear();
+            HttpClient.DefaultRequestHeaders.Add("authorization", $"bearer {usuarioAutenticarResponse.AccessToken}");
+
+            var handler = new JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(usuarioAutenticarResponse.AccessToken);
+
+            var claims = token.Claims.ToList();
+
+            await SessionStorage.SetItemAsync("userId", claims[0].Value);
+            await SessionStorage.SetItemAsync("userName", claims[1].Value);
+
+            NavigationManager.NavigateTo("/home");
+
+            AuthService.TriggerLoggedIn();
+        }
+    }
+
+    private async void RegistrarUsuario()
+    {
+        NavigationManager.NavigateTo("/cadastro");
+    }
+}

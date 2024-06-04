@@ -1,0 +1,28 @@
+﻿@inherits LayoutComponentBase
+
+@if (RenderWhenLogged)
+{
+    <NavMenu />
+}
+@Body
+
+@code
+{
+    public bool RenderWhenLogged { get; private set; } = false;
+
+    protected override void OnInitialized()
+    {
+        AuthService.OnLogin += HandleLoggedInEvent;
+        AuthService.OnLogout += HandleLoggedOutEvent;
+    }
+
+    private void HandleLoggedInEvent()
+    {
+        RenderWhenLogged = true;
+    }
+
+    private void HandleLoggedOutEvent()
+    {
+        RenderWhenLogged = false;
+    }
+}
