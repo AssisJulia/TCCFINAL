@@ -24,8 +24,8 @@
     </div>
 
     <div class="rz-p-12 rz-text-align-center" style="margin: 2rem -2rem -2rem -2rem;">
-        <RadzenButton Variant="Variant.Flat" Click=@(() => voltar()) Style="margin-right: 50px; background-color: #217011" Text="Voltar" />
-        <RadzenButton Variant="Variant.Flat" Click=@(() => setquestion()) Text="Proxima" Style="background-color: #217011" />
+        <RadzenButton Variant="Variant.Flat" Click=@(() => voltar()) Style="margin-right: 50px; background-color: #450AE5" Text="Voltar" />
+        <RadzenButton Variant="Variant.Flat" Click=@(() => setquestion()) Text="Proxima" Style="background-color: #450AE5" />
     </div>
 
 </RadzenCard>
@@ -166,7 +166,7 @@
                 for (int c = 0; c < 4; c++)
                 {
                     string silabaaleatoria = alfabeto[rnd.Next(1, alfabeto.Count())] + vogais[rnd.Next(1, vogais.Count())];
-                    buttons.Add(new ButtonModel { Id = c, alternativa = silabaaleatoria, Style = "background-color: #FFCD00" });
+                    buttons.Add(new ButtonModel { Id = c, alternativa = silabaaleatoria, Style = "background-color: #047DE8" });
                 }
 
                 buttons[rnd.Next(0, 4)].alternativa = resposta;
@@ -187,7 +187,7 @@
         if (clickedButton.alternativa == resposta)
         {
             contador++;
-            msg = contador >= 3 ? "Parabens! essa é a " + contador + " consecutiva!" : "Parabéns!";
+            msg = contador >= 3 ? "Parabens! essa é a " + contador + " consecutiva!" : "PARABÉNS!";
             clickedButton.Style = "background-color: green; color: white;";
 
             // Controller con = new Controller();
@@ -211,14 +211,14 @@
         else
         {
             contador = 0;
-            msg = "Tente novamente!";
+            msg = "POXA! Tente novamente! :)";
             clickedButton.Style = "background-color: red; color: white;";
         }
     }
-
+     
     public void voltar()
     {
-        NavigationManager.NavigateTo("/");
+        NavigationManager.NavigateTo("/home");
     }
 
     protected override void OnInitialized() // = On Page Load

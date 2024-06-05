@@ -19,30 +19,26 @@
 <RadzenRow Gap="0" Class="rz-m-2 rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 800px;">
     <RadzenColumn Size="12" SizeMD="6">
         <RadzenCard Style="height: 100%; background-color: #28E1F6; align-content: center; text-align: center">
-            <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H2" Style="color: white; font-family: 'Ubuntu', sans-serif;">Bem Vindo ao</RadzenText>
+            <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H2" Style="color: white; font-family: 'Ubuntu', sans-serif;">Bem Vindo de Volta ao</RadzenText>
             <RadzenText TextStyle="TextStyle.DisplayH3" Style="color: white; font-family: 'Lilita One', sans-serif;">Sammi Games!</RadzenText>
             <RadzenImage Path="logoSammi.png" Style="width: 40%;" AlternateText="O Melhor Site de Jogos Educativos Infantis."/>
         </RadzenCard>
     </RadzenColumn>
     <RadzenColumn Size="12" SizeMD="6">
         <RadzenCard Class="rz-shadow-0 rz-border-radius-0 rz-p-12">
-            <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H2" Style="color: black; font-family: 'Ubuntu', sans-serif; text-align: center">Login</RadzenText>
-
+            <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H2" Style="color: black; font-family: 'Ubuntu', sans-serif; text-align: center;">Login</RadzenText>
                 <RadzenLogin AllowRegister="true" 
-                             RegisterMessageText="Ainda não possui uma conta?" 
-                             RegisterText="Cadastre-se" 
-                             AllowResetPassword="false" 
-                             UserText="Email" 
-                             LoginText="Login"
-                             PasswordText="Senha"
-                             UserRequired="Campo Obrigatório"
-                             PasswordRequired="Campo Obrigatório"
-                             Login=@(args => Autenticar(args, "Login com valores padrões"))
-                             Register=@(args => RegistrarUsuario()) />
-
+                    RegisterMessageText="Ainda não possui uma conta?"
+                    RegisterText="Cadastre-se" 
+                    AllowResetPassword="false" 
+                    UserText="Email" 
+                    LoginText="Login"
+                    PasswordText="Senha"
+                    UserRequired="Campo Obrigatório"
+                    PasswordRequired="Campo Obrigatório"
+                    Login=@(args => Autenticar(args, "Login com valores padrões"))
+                    Register=@(args => RegistrarUsuario()) />
         </RadzenCard>
-
-
     </RadzenColumn>
 </RadzenRow>
 
