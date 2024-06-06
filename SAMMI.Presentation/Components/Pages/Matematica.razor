@@ -1,8 +1,19 @@
 @page "/Matematica/{operacao}"
 
+@using SAMMI.Domain.DTOs.Pontuacao.Request;
+@using SAMMI.Domain.Enumerators;
+@using System.Net
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
+
 <RadzenRow>
     <RadzenColumn>
-        <RadzenCard Size="12" SizeMD="6" OffsetMD="3" SizeLG="6" OffsetLG="3" SizeSM="10" OffsetSM="1">
+        <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
+            <div style="margin-top: 0%; text-align: center">
+                <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H2" Style="color: black; font-family: 'Lilita One', sans-serif;">Resolva a Conta!</RadzenText>
+            </div>
             <div class="rz-p-12 rz-text-align-center" style="font-size: 20px">
                 <RadzenLabel Text="@(questao)" Style="margin-left: 8px; vertical-align: middle;" />
             </div>
@@ -21,6 +32,7 @@
             <div class="rz-p-12 rz-text-align-center" style="margin: 2rem -2rem -2rem -2rem;">
                 <RadzenButton Variant="Variant.Flat" Click=@(() => voltar()) Style="margin-right: 50px; background-color: #450AE5" Text="Voltar" />
                 <RadzenButton Variant="Variant.Flat" Click=@(() => setquestion()) Style="background-color: #450AE5" Text="Proxima" />
+                <RadzenButton Variant="Variant.Flat" Click=@(() => Finalizar()) Text="Finalizar Jogatina..." Style="background-color: #450AE5" />
             </div>
         </RadzenCard>
     </RadzenColumn>
@@ -35,6 +47,7 @@
     public string msg;
     public int resposta;
     public int contador = 0;
+    public int pontos = 0;
 
     static Random rnd = new Random();
 
@@ -51,6 +64,7 @@
     {
         if (clickedButton.alternativa == resposta)
         {
+            pontos++;
             contador++;
             msg = contador >= 3 ? "Parabens! essa é a " + contador + " consecutiva!" : "PARABÉNS!";
             clickedButton.Style = "background-color: green; color: white;";
@@ -137,6 +151,46 @@
     {
         setquestion();
     }
+
+    public async void Finalizar()
+    {
+
+        var request = new CriarPontuacaoRequest
+            {
+                Nivel = Nivel.SeteAnos,
+                TipoJogo = operacao == "adi" ? TipoJogo.Adicao :
+                           operacao == "sub" ? TipoJogo.Subtracao :
+                           operacao == "mul" ? TipoJogo.Multiplicacao :
+                           TipoJogo.Divisao,
+                QuantidadePontuacao = pontos
+            };
+
+        var response = await HttpClient.PostAsJsonAsync("pontuacao", request);
+        if (response.StatusCode == HttpStatusCode.Created)
+        {
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Sucesso",
+                    Detail = "Pontuação Registrada com Sucesso!!!",
+                    Duration = 4000
+                });
+
+            NavigationManager.NavigateTo("/pontos");
+        }
+        else
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Problemas ao Registrar Pontuação",
+                    Detail = errorContent,
+                    Duration = 4000
+                });
+        }
+    }
+
 
     public void voltar()
     {
