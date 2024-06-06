@@ -1,9 +1,20 @@
 @page "/Portugues/{operacao}"
 
 @using System.Text.RegularExpressions;
+@using SAMMI.Domain.DTOs.Pontuacao.Request;
+@using SAMMI.Domain.Enumerators;
+@using System.Net
 @inject IJSRuntime JSRuntime
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
+
 <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
+
+    <div style="margin-top: 0%; text-align: center">
+        <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H2" Style="color: black; font-family: 'Lilita One', sans-serif;">Complete a Palavra!</RadzenText>
+    </div>
 
     <div class="rz-p-12 rz-text-align-center" style="font-size: 20px;padding: 1rem!important;">
         <RadzenLabel Text="@(questao.ToLower())" Style="margin-left: 8px; vertical-align: middle;" />
@@ -12,7 +23,7 @@
     @if (!string.IsNullOrEmpty(msg))
     {
         <div class="rz-p-12 rz-text-align-center" style="font-size: 16px;padding: 1rem!important;">
-            <RadzenLabel Text="@(msg.ToLower())" Style="margin-left: 8px; vertical-align: middle;" />
+            <RadzenLabel Text="@(msg.ToUpper())" Style="margin-left: 8px; vertical-align: middle;" />
         </div>
     }
 
@@ -26,6 +37,7 @@
     <div class="rz-p-12 rz-text-align-center" style="margin: 2rem -2rem -2rem -2rem;">
         <RadzenButton Variant="Variant.Flat" Click=@(() => voltar()) Style="margin-right: 50px; background-color: #450AE5" Text="Voltar" />
         <RadzenButton Variant="Variant.Flat" Click=@(() => setquestion()) Text="Proxima" Style="background-color: #450AE5" />
+        <RadzenButton Variant="Variant.Flat" Click=@(() => Finalizar()) Text="Finalizar Jogatina..." Style="background-color: #450AE5" />
     </div>
 
 </RadzenCard>
@@ -40,6 +52,7 @@
     public string msg;
     public int alternativa;
     public string resposta;
+    public int pontos = 0;
     public string[] alfabeto = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" };
     public string[] vogais = { "a", "e", "i", "o", "u" };
     public string[] palavras = {
@@ -166,7 +179,7 @@
                 for (int c = 0; c < 4; c++)
                 {
                     string silabaaleatoria = alfabeto[rnd.Next(1, alfabeto.Count())] + vogais[rnd.Next(1, vogais.Count())];
-                    buttons.Add(new ButtonModel { Id = c, alternativa = silabaaleatoria, Style = "background-color: #047DE8" });
+                    buttons.Add(new ButtonModel { Id = c, alternativa = silabaaleatoria, Style = "background-color: #047DE8; text-transform: lowercase;" });
                 }
 
                 buttons[rnd.Next(0, 4)].alternativa = resposta;
@@ -186,6 +199,7 @@
     {
         if (clickedButton.alternativa == resposta)
         {
+            pontos++;
             contador++;
             msg = contador >= 3 ? "Parabens! essa é a " + contador + " consecutiva!" : "PARABÉNS!";
             clickedButton.Style = "background-color: green; color: white;";
@@ -215,7 +229,43 @@
             clickedButton.Style = "background-color: red; color: white;";
         }
     }
-     
+
+    public async void Finalizar()
+    {
+
+        var request = new CriarPontuacaoRequest
+            {
+                Nivel = Nivel.SeisAnos,
+                TipoJogo = TipoJogo.Silaba,
+                QuantidadePontuacao = pontos
+            };
+
+        var response = await HttpClient.PostAsJsonAsync("pontuacao", request);
+        if (response.StatusCode == HttpStatusCode.Created)
+        {
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Sucesso",
+                    Detail = "Pontuação Registrada com Sucesso!!!",
+                    Duration = 4000
+                });
+
+            NavigationManager.NavigateTo("/pontos");
+        }
+        else
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Problemas ao Registrar Pontuação",
+                    Detail = errorContent,
+                    Duration = 4000
+                });
+        }
+    }
+
     public void voltar()
     {
         NavigationManager.NavigateTo("/home");
