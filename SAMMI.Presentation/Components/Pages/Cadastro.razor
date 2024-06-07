@@ -17,7 +17,7 @@
 <RadzenNotification />
 
 <RadzenRow Gap="0" Class="rz-m-2 rz-my-12 rz-mx-auto rz-border-radius-6 rz-shadow-10" Style="width: 100%; max-width: 800px;">
-    <RadzenColumn Size="10" SizeMD="6">
+    <RadzenColumn>
         <RadzenCard Style="height: 100%; background-color: #28E1F6; align-content: center; text-align: center">
             <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H2" Style="color: white; font-family: 'Ubuntu', sans-serif;">Bem Vindo ao</RadzenText>
             <RadzenText TextStyle="TextStyle.DisplayH3" Style="color: white; font-family: 'Lilita One', sans-serif;">Sammi Games!</RadzenText>
@@ -31,9 +31,9 @@
                 <RadzenStack>
                     <RadzenRow AlignItems="AlignItems.Center">
                         <RadzenColumn Size="12">
-                            <RadzenFormField Text="Usuário" Variant="@variant" Style="width: 100%; font-family: 'Ubuntu', sans-serif;">
+                            <RadzenFormField Text="Nome" Variant="@variant" Style="width: 100%; font-family: 'Ubuntu', sans-serif; margin-top: 20px">
                                 <ChildContent>
-                                    <RadzenTextBox @bind-value="@usuarioAdicionarRequest.Nome" />
+                                    <RadzenTextBox Name="Nome" @bind-value="@usuarioAdicionarRequest.Nome" />
                                 </ChildContent>
                                 <End>
                                     <RadzenIcon Icon="account_circle" />
@@ -41,10 +41,10 @@
                             </RadzenFormField>
                         </RadzenColumn>
                     </RadzenRow>
-                    
+
                     <RadzenRow AlignItems="AlignItems.Center">
                         <RadzenColumn Size="12">
-                            <RadzenFormField Text="E-mail" Variant="@variant" Style="width: 100%; margin-left: 0; margin-right: 0; font-family: 'Ubuntu', sans-serif;">
+                            <RadzenFormField Text="E-mail" Variant="@variant" Style="width: 100%; margin-left: 0; margin-right: 0; font-family: 'Ubuntu', sans-serif;  margin-top: 20px">
                                 <ChildContent>
                                     <RadzenTextBox Name="Email" @bind-Value="@usuarioAdicionarRequest.EmailLogin" />
                                 </ChildContent>
@@ -54,16 +54,22 @@
                             </RadzenFormField>
                         </RadzenColumn>
                     </RadzenRow>
-
                     <RadzenRow AlignItems="AlignItems.Center">
                         <RadzenColumn Size="12">
                             <RadzenEmailValidator Component="Email" Text="Informe um e-mail válido" />
+
                         </RadzenColumn>
                     </RadzenRow>
 
                     <RadzenRow AlignItems="AlignItems.Center">
                         <RadzenColumn Size="12">
-                            <RadzenFormField Text="Confirmar e-mail" Variant="@variant" Style="width: 100%; font-family: 'Ubuntu', sans-serif;">
+                            <RadzenRequiredValidator Component="Email" Text="O email é obrigatório" Style="position: absolute" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12">
+                            <RadzenFormField Text="Confirmar e-mail" Variant="@variant" Style="width: 100%; font-family: 'Ubuntu', sans-serif; margin-top: 20px">
                                 <ChildContent>
                                     <RadzenTextBox Name="ConfirmarEmail" @bind-Value="@usuarioAdicionarRequest.EmailLoginConfirmacao" />
                                 </ChildContent>
@@ -76,16 +82,21 @@
 
                     <RadzenRow AlignItems="AlignItems.Center">
                         <RadzenColumn Size="12">
-                            <RadzenEmailValidator Component="ConfirmarEmail" Text="Informe um e-mail válido" />
-                            <RadzenCompareValidator Visible=@(!string.IsNullOrEmpty(usuarioAdicionarRequest.EmailLoginConfirmacao)) Value=@usuarioAdicionarRequest.EmailLogin Component="ConfirmarEmail" Text="Os e-mails precisam estar iguais" />
+                            <RadzenRequiredValidator Component="ConfirmarEmail" Text="A confirmação é obrigatória" Style="position: absolute" />
                         </RadzenColumn>
                     </RadzenRow>
 
                     <RadzenRow AlignItems="AlignItems.Center">
                         <RadzenColumn Size="12">
-                            <RadzenFormField Text="Senha" Variant="@variant" Style="width: 100%; font-family: 'Ubuntu', sans-serif;">
+                            <RadzenEmailValidator Component="ConfirmarEmail" Text="Informe um e-mail válido" />
+                            <RadzenCompareValidator Visible=@(!string.IsNullOrEmpty(usuarioAdicionarRequest.EmailLoginConfirmacao)) Value=@usuarioAdicionarRequest.EmailLogin Component="ConfirmarEmail" Text="Os e-mails precisam estar iguais" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12">
+                            <RadzenFormField Text="Senha" Variant="@variant" Style="width: 100%; font-family: 'Ubuntu', sans-serif; margin-top: 20px">
                                 <ChildContent>
-                                    <RadzenPassword @bind-Value="@usuarioAdicionarRequest.Senha" />
+                                    <RadzenPassword Name="Senha" @bind-Value="@usuarioAdicionarRequest.Senha"/>
                                 </ChildContent>
                                 <End>
                                     <RadzenIcon Icon="https" />
@@ -93,16 +104,30 @@
                             </RadzenFormField>
                         </RadzenColumn>
                     </RadzenRow>
+
                     <RadzenRow AlignItems="AlignItems.Center">
                         <RadzenColumn Size="12">
-                            <RadzenFormField Text="Confirmar Senha" Variant="@variant" Style="width: 100%; font-family: 'Ubuntu', sans-serif;">
+                            <RadzenRequiredValidator Component="Senha" Text="A senha é obrigatória" Style="position: absolute" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12">
+                            <RadzenFormField Text="Confirmar Senha" Variant="@variant" Style="width: 100%; font-family: 'Ubuntu', sans-serif; margin-top: 20px">
                                 <ChildContent>
-                                    <RadzenPassword @bind-Value="@usuarioAdicionarRequest.SenhaConfirmacao" />
+                                    <RadzenPassword Name="SenhaConfirmacao" @bind-Value="@usuarioAdicionarRequest.SenhaConfirmacao" />
                                 </ChildContent>
                                 <End>
                                     <RadzenIcon Icon="https" />
                                 </End>
                             </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12">
+                            <RadzenRequiredValidator Component="SenhaConfirmacao" Text="A confirmação da senha é obrigatória" Style="position: absolute" />
+                            <RadzenCompareValidator Visible="@( !string.IsNullOrEmpty(usuarioAdicionarRequest.SenhaConfirmacao) )" Value="@usuarioAdicionarRequest.Senha" Component="SenhaConfirmacao" Text="As senhas devem ser iguais" Style="position: absolute" />
                         </RadzenColumn>
                     </RadzenRow>
                 </RadzenStack>

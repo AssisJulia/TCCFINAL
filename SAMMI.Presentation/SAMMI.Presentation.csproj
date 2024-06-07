@@ -41,20 +41,32 @@
 
     <ItemGroup>
         <!-- App Icon -->
-        <MauiIcon Include="Resources\AppIcon\logosammi.png" ForegroundFile="Resources\AppIcon\logosammi.png" Color="#512BD4" />
+        <MauiIcon Include="Resources\AppIcon\ciano.png" ForegroundFile="Resources\AppIcon\ciano.png" Color="#28E1F6" />
 
         <!-- Splash Screen -->
-        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+        <MauiSplashScreen Include="Resources\Splash\ciano.png" Color="#28E1F6" BaseSize="128,128" />
 
         <!-- Images -->
         <MauiImage Include="Resources\Images\*" />
-        <MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
 
         <!-- Custom Fonts -->
         <MauiFont Include="Resources\Fonts\*" />
 
         <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
         <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <MauiImage Remove="Resources\Images\dotnet_bot.svg" />
+      <MauiImage Remove="Resources\Images\logosammi.svg" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Resources\AppIcon\appicon.svg" />
+      <None Remove="Resources\Images\dotnet_bot.svg" />
+      <None Remove="Resources\Images\logosammi.svg" />
+      <None Remove="Resources\Splash\logosammi.svg" />
+      <None Remove="Resources\Splash\splash.svg" />
     </ItemGroup>
 
     <ItemGroup>
@@ -80,6 +92,10 @@
       <Content Update="Components\Layout\NavMenu.razor">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Resources\Images\" />
     </ItemGroup>
 
 </Project>
